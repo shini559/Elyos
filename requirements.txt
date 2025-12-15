@@ -8,3 +8,5 @@ uvicorn
 jinja2
 pytest
 httpx
+loguru
+requests
