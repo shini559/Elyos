@@ -1,0 +1,59 @@
+:root {
+    --primary-color: #800020; /* Bordeaux */
+    --secondary-color: #D4AF37; /* Or */
+    --light-bg: #f8f9fa;
+    --text-color: #333;
+}
+
+body {
+    background-color: var(--light-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+}
+
+.navbar {
+    background-color: var(--primary-color) !important;
+}
+
+.navbar-brand {
+    color: var(--secondary-color) !important;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #600018;
+    border-color: #600018;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+#result-card {
+    display: none;
+    border: 2px solid var(--secondary-color);
+}
+
+.prediction-score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}

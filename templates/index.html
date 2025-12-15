@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Élyos - Prédiction de Qualité du Vin</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🍷 Élyos AI</a>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h4 class="mb-0">Prédire la Qualité du Vin</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <h5 class="mb-3 border-bottom pb-2">Caractéristiques Chimiques</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="fixed_acidity" class="form-label">Fixed Acidity</label>
+                                    <input type="number" step="0.1" class="form-control" id="fixed_acidity" required value="7.4">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="volatile_acidity" class="form-label">Volatile Acidity</label>
+                                    <input type="number" step="0.01" class="form-control" id="volatile_acidity" required value="0.7">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="citric_acid" class="form-label">Citric Acid</label>
+                                    <input type="number" step="0.01" class="form-control" id="citric_acid" required value="0.0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="residual_sugar" class="form-label">Residual Sugar</label>
+                                    <input type="number" step="0.1" class="form-control" id="residual_sugar" required value="1.9">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="chlorides" class="form-label">Chlorides</label>
+                                    <input type="number" step="0.001" class="form-control" id="chlorides" required value="0.076">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="free_sulfur_dioxide" class="form-label">Free SO2</label>
+                                    <input type="number" step="1.0" class="form-control" id="free_sulfur_dioxide" required value="11.0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="total_sulfur_dioxide" class="form-label">Total SO2</label>
+                                    <input type="number" step="1.0" class="form-control" id="total_sulfur_dioxide" required value="34.0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="density" class="form-label">Density</label>
+                                    <input type="number" step="0.0001" class="form-control" id="density" required value="0.9978">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="pH" class="form-label">pH</label>
+                                    <input type="number" step="0.01" class="form-control" id="pH" required value="3.51">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="sulphates" class="form-label">Sulphates</label>
+                                    <input type="number" step="0.01" class="form-control" id="sulphates" required value="0.56">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="alcohol" class="form-label">Alcohol</label>
+                                    <input type="number" step="0.1" class="form-control" id="alcohol" required value="9.4">
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4 mb-3 border-bottom pb-2">Données Météo & Contexte</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="temperature" class="form-label">Température Moyenne (°C)</label>
+                                    <input type="number" step="0.1" class="form-control" id="temperature" required value="12.5">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="rain" class="form-label">Pluie (mm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="rain" required value="600">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="country" class="form-label">Pays</label>
+                                    <select class="form-select" id="country">
+                                        <option value="" selected>Choisir un pays...</option>
+                                        <option value="FR">France</option>
+                                        <option value="ES">Espagne</option>
+                                        <option value="IT">Italie</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Prédire la Qualité</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Résultat -->
+                <div class="card mt-4 text-center" id="result-card">
+                    <div class="card-body">
+                        <h3 class="card-title">Qualité Estimée</h3>
+                        <p class="prediction-score" id="score-display">-</p>
+                        <p class="text-muted">Sur une échelle de 0 à 10</p>
+                    </div>
+                </div>
+                
+                <div id="error-alert" class="alert alert-danger mt-3 d-none" role="alert">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultCard = document.getElementById('result-card');
+            const scoreDisplay = document.getElementById('score-display');
+            const errorAlert = document.getElementById('error-alert');
+            
+            resultCard.style.display = 'none';
+            errorAlert.classList.add('d-none');
+
+            // Collecte des données
+            const data = {
+                fixed_acidity: parseFloat(document.getElementById('fixed_acidity').value),
+                volatile_acidity: parseFloat(document.getElementById('volatile_acidity').value),
+                citric_acid: parseFloat(document.getElementById('citric_acid').value),
+                residual_sugar: parseFloat(document.getElementById('residual_sugar').value),
+                chlorides: parseFloat(document.getElementById('chlorides').value),
+                free_sulfur_dioxide: parseFloat(document.getElementById('free_sulfur_dioxide').value),
+                total_sulfur_dioxide: parseFloat(document.getElementById('total_sulfur_dioxide').value),
+                density: parseFloat(document.getElementById('density').value),
+                pH: parseFloat(document.getElementById('pH').value),
+                sulphates: parseFloat(document.getElementById('sulphates').value),
+                alcohol: parseFloat(document.getElementById('alcohol').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                rain: parseFloat(document.getElementById('rain').value)
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur API: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                scoreDisplay.textContent = result.predicted_quality.toFixed(2);
+                resultCard.style.display = 'block';
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorAlert.textContent = "Une erreur est survenue lors de la prédiction.";
+                errorAlert.classList.remove('d-none');
+            }
+        });
+    </script>
+</body>
+</html>

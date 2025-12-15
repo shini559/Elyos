@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import pandas as pd
 import joblib
@@ -7,6 +9,12 @@ import os
 # --- Configuration & Chargement du Modèle ---
 
 app = FastAPI(title="Elyos Wine Quality API", description="API de prédiction de la qualité du vin.", version="1.0")
+
+# Montage des fichiers statiques (CSS, JS, Images)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Configuration des templates (Jinja2)
+templates = Jinja2Templates(directory="templates")
 
 MODEL_PATH = "models/best_model.joblib"
 model = None
@@ -45,9 +53,9 @@ class WineFeatures(BaseModel):
 # --- Endpoints ---
 
 @app.get("/")
-def read_root():
+def read_root(request: Request):
     """Endpoint de base pour vérifier que l'API est en ligne."""
-    return {"message": "API elyos en ligne"}
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/predict")
 def predict_quality(features: WineFeatures):
