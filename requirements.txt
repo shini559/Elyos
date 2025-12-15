@@ -6,3 +6,5 @@ joblib
 fastapi
 uvicorn
 jinja2
+pytest
+httpx

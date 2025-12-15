@@ -8,7 +8,21 @@ import os
 
 # --- Configuration & Chargement du Modèle ---
 
-app = FastAPI(title="Elyos Wine Quality API", description="API de prédiction de la qualité du vin.", version="1.0")
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Charge le modèle au démarrage
+    global model
+    if os.path.exists(MODEL_PATH):
+        model = joblib.load(MODEL_PATH)
+        print(f"Modèle chargé depuis {MODEL_PATH}")
+    else:
+        print(f"ATTENTION: Modèle non trouvé à {MODEL_PATH}. L'API ne pourra pas faire de prédictions.")
+    yield
+    # Code à l'arrêt si nécessaire (rien ici)
+
+app = FastAPI(title="Elyos Wine Quality API", description="API de prédiction de la qualité du vin.", version="1.0", lifespan=lifespan)
 
 # Montage des fichiers statiques (CSS, JS, Images)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -18,16 +32,6 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_PATH = "models/best_model.joblib"
 model = None
-
-@app.on_event("startup")
-def load_model():
-    """Charge le modèle au démarrage de l'application."""
-    global model
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        print(f"Modèle chargé depuis {MODEL_PATH}")
-    else:
-        print(f"ATTENTION: Modèle non trouvé à {MODEL_PATH}. L'API ne pourra pas faire de prédictions.")
 
 # --- Schémas de Données (Pydantic) ---
 
@@ -55,7 +59,7 @@ class WineFeatures(BaseModel):
 @app.get("/")
 def read_root(request: Request):
     """Endpoint de base pour vérifier que l'API est en ligne."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/predict")
 def predict_quality(features: WineFeatures):
